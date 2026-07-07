@@ -148,8 +148,80 @@ def partition_data_iid(train_features, train_labels, num_clients, seed):
     
     return parts
 
-# Step 5 - partition_data_non_iid (not yet solved)
-# TODO: implement
+# Step 5 - partition_data_non_iid
+def partition_data_non_iid(train_features, train_labels, num_clients, shards_per_client, seed):
+    """
+    Partition training data across clients in a non-IID manner.
+    
+    Each client receives shards_per_client label-contiguous shards, making
+    their label distribution skewed (heterogeneous).
+    
+    Args:
+        train_features: (M, input_size) tensor of training features
+        train_labels: (M,) tensor of training labels
+        num_clients: Number of clients to partition data among
+        shards_per_client: Number of label shards each client receives
+        seed: Random seed for reproducibility
+    
+    Returns:
+        list: List of (client_features, client_labels) tensor pairs for each client
+    """
+    M = train_features.shape[0]
+    
+    # Handle edge cases
+    if num_clients <= 0:
+        num_clients = 1
+    
+    # Create a seeded generator
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    
+    # Sort by labels
+    sorted_indices = torch.argsort(train_labels)
+    sorted_features = train_features[sorted_indices]
+    sorted_labels = train_labels[sorted_indices]
+    
+    # Total shards needed
+    total_shards = num_clients * shards_per_client
+    
+    # Split into shards
+    shards = []
+    samples_per_shard = M // total_shards
+    
+    for i in range(total_shards):
+        start_idx = i * samples_per_shard
+        end_idx = (i + 1) * samples_per_shard if i < total_shards - 1 else M
+        
+        shard_features = sorted_features[start_idx:end_idx]
+        shard_labels = sorted_labels[start_idx:end_idx]
+        shards.append((shard_features, shard_labels))
+    
+    # Shuffle shards
+    shard_indices = torch.randperm(total_shards, generator=generator)
+    
+    # Assign shards to clients
+    parts = []
+    for client_idx in range(num_clients):
+        client_features_list = []
+        client_labels_list = []
+        
+        for s in range(shards_per_client):
+            shard_idx = client_idx * shards_per_client + s
+            if shard_idx < total_shards:
+                actual_shard_idx = shard_indices[shard_idx]
+                feat, lab = shards[actual_shard_idx]
+                client_features_list.append(feat)
+                client_labels_list.append(lab)
+        
+        # Concatenate
+        if client_features_list:
+            client_features = torch.cat(client_features_list, dim=0)
+            client_labels = torch.cat(client_labels_list, dim=0)
+            parts.append((client_features, client_labels))
+        else:
+            parts.append((torch.tensor([]), torch.tensor([], dtype=torch.long)))
+    
+    return parts
 
 # Step 6 - count_client_samples (not yet solved)
 # TODO: implement
