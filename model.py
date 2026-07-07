@@ -329,8 +329,43 @@ def local_sgd_step(model, optimizer, batch_features, batch_labels):
     # Return loss as Python float
     return loss.item()
 
-# Step 10 - train_client_local (not yet solved)
-# TODO: implement
+# Step 10 - train_client_local
+def train_client_local(model, client_features, client_labels, local_epochs, batch_size, learning_rate, seed):
+    """
+    Train one client for local_epochs and return its updated state dict.
+    
+    Args:
+        model: nn.Module to train
+        client_features: (n, input_size) tensor of client features
+        client_labels: (n,) tensor of client labels
+        local_epochs: Number of local training epochs
+        batch_size: Mini-batch size
+        learning_rate: Learning rate for SGD optimizer
+        seed: Random seed for reproducibility (incremented per epoch)
+    
+    Returns:
+        OrderedDict: Model's state dict after local training
+    """
+    # Create SGD optimizer
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    
+    # Train for local_epochs
+    for epoch in range(local_epochs):
+        # Use a different seed for each epoch to get different shuffles
+        epoch_seed = seed + epoch
+        
+        # Get batches for this epoch (reshuffled)
+        batches = iterate_client_batches(
+            client_features, client_labels, batch_size, epoch_seed
+        )
+        
+        # Process each batch
+        for batch_features, batch_labels in batches:
+            # Perform one SGD update
+            local_sgd_step(model, optimizer, batch_features, batch_labels)
+    
+    # Return the updated model state dict
+    return model.state_dict()
 
 # Step 11 - clone_model_state (not yet solved)
 # TODO: implement
