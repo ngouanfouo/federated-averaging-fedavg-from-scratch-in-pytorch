@@ -764,8 +764,41 @@ def train_centralized_baseline(train_features, train_labels, test_features, test
     
     return accuracy
 
-# Step 22 - run_fedavg_iid (not yet solved)
-# TODO: implement
+# Step 22 - run_fedavg_iid
+def run_fedavg_iid(train_features, train_labels, test_features, test_labels, model_config, num_clients, num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed):
+    """
+    Run FedAvg on IID-partitioned data and return the accuracy curve.
+    
+    Args:
+        train_features: (M, input_size) tensor of training features
+        train_labels: (M,) tensor of training labels
+        test_features: (N, input_size) tensor of test features
+        test_labels: (N,) tensor of test labels
+        model_config: Dict with 'input_size', 'hidden_size', 'num_classes'
+        num_clients: Number of clients to partition data among
+        num_rounds: Number of communication rounds
+        client_fraction: Fraction of clients to select each round
+        local_epochs: Number of local training epochs per client
+        batch_size: Mini-batch size for local training
+        learning_rate: Learning rate for local SGD
+        seed: Random seed for reproducibility
+    
+    Returns:
+        list: Per-round test accuracies
+    """
+    # Partition training data IID across clients
+    client_partitions = partition_data_iid(
+        train_features, train_labels, num_clients, seed
+    )
+    
+    # Run FedAvg
+    _, per_round_accuracies = run_fedavg(
+        client_partitions, test_features, test_labels, model_config,
+        num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed
+    )
+    
+    # Return only the accuracy curve
+    return per_round_accuracies
 
 # Step 23 - run_fedavg_non_iid (not yet solved)
 # TODO: implement
