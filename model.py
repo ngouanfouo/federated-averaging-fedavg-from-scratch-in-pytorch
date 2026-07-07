@@ -502,8 +502,40 @@ def scale_state_dict(state_dict, weight):
     
     return result
 
-# Step 16 - aggregate_weighted_average (not yet solved)
-# TODO: implement
+# Step 16 - aggregate_weighted_average
+def aggregate_weighted_average(client_states, client_sample_counts):
+    """
+    Aggregate client state dicts using sample-weighted averaging (FedAvg).
+    
+    Args:
+        client_states: List of state dicts from each client
+        client_sample_counts: List of sample counts for each client
+    
+    Returns:
+        dict: Weighted average of client state dicts
+    """
+    # Calculate total samples
+    total_samples = sum(client_sample_counts)
+    
+    # Start with an empty state dict (zero initialization)
+    # We'll build it incrementally
+    aggregated = None
+    
+    # Iterate over each client
+    for state_dict, sample_count in zip(client_states, client_sample_counts):
+        # Calculate weight for this client
+        weight = sample_count / total_samples
+        
+        # Scale the client's state dict by its weight
+        scaled_state = scale_state_dict(state_dict, weight)
+        
+        # Add to the aggregated result
+        if aggregated is None:
+            aggregated = scaled_state
+        else:
+            aggregated = add_state_dicts(aggregated, scaled_state)
+    
+    return aggregated
 
 # Step 17 - select_round_clients (not yet solved)
 # TODO: implement
