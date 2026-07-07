@@ -300,8 +300,34 @@ def compute_batch_loss(model, batch_features, batch_labels):
     
     return loss
 
-# Step 9 - local_sgd_step (not yet solved)
-# TODO: implement
+# Step 9 - local_sgd_step
+def local_sgd_step(model, optimizer, batch_features, batch_labels):
+    """
+    Perform one SGD update step on a batch.
+    
+    Args:
+        model: nn.Module to update
+        optimizer: torch.optim.Optimizer for parameter updates
+        batch_features: (B, input_size) tensor of features
+        batch_labels: (B,) tensor of integer class labels
+    
+    Returns:
+        float: Loss value as a Python float
+    """
+    # Zero gradients from previous step
+    optimizer.zero_grad()
+    
+    # Compute loss
+    loss = compute_batch_loss(model, batch_features, batch_labels)
+    
+    # Backward pass
+    loss.backward()
+    
+    # Update model parameters
+    optimizer.step()
+    
+    # Return loss as Python float
+    return loss.item()
 
 # Step 10 - train_client_local (not yet solved)
 # TODO: implement
