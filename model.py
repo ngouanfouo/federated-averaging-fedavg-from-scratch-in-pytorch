@@ -836,8 +836,30 @@ def run_fedavg_non_iid(train_features, train_labels, test_features, test_labels,
     
     return model, per_round_accuracies
 
-# Step 24 - compute_non_iid_gap (not yet solved)
-# TODO: implement
+# Step 24 - compute_non_iid_gap
+def compute_non_iid_gap(iid_accuracies, non_iid_accuracies):
+    """
+    Compute the performance gap between IID and non-IID FedAvg runs.
+    
+    Args:
+        iid_accuracies: List of per-round test accuracies from IID run
+        non_iid_accuracies: List of per-round test accuracies from non-IID run
+    
+    Returns:
+        dict: Dictionary with 'iid_final', 'non_iid_final', and 'gap' as floats
+    """
+    # Get final accuracies (last element of each list)
+    iid_final = float(iid_accuracies[-1])
+    non_iid_final = float(non_iid_accuracies[-1])
+    
+    # Calculate the gap
+    gap = iid_final - non_iid_final
+    
+    return {
+        'iid_final': iid_final,
+        'non_iid_final': non_iid_final,
+        'gap': gap
+    }
 
 # Step 25 - rounds_to_target_vs_local_epochs (not yet solved)
 # TODO: implement
