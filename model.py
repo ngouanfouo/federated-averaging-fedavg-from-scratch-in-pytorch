@@ -800,8 +800,41 @@ def run_fedavg_iid(train_features, train_labels, test_features, test_labels, mod
     # Return only the accuracy curve
     return per_round_accuracies
 
-# Step 23 - run_fedavg_non_iid (not yet solved)
-# TODO: implement
+# Step 23 - run_fedavg_non_iid
+def run_fedavg_non_iid(train_features, train_labels, test_features, test_labels, model_config, num_clients, shards_per_client, num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed):
+    """
+    Run FedAvg on non-IID (shard-based) partitioned data.
+    
+    Args:
+        train_features: (M, input_size) tensor of training features
+        train_labels: (M,) tensor of training labels
+        test_features: (N, input_size) tensor of test features
+        test_labels: (N,) tensor of test labels
+        model_config: Dict with 'input_size', 'hidden_size', 'num_classes'
+        num_clients: Number of clients to partition data among
+        shards_per_client: Number of label shards each client receives
+        num_rounds: Number of communication rounds
+        client_fraction: Fraction of clients to select each round
+        local_epochs: Number of local training epochs per client
+        batch_size: Mini-batch size for local training
+        learning_rate: Learning rate for local SGD
+        seed: Random seed for reproducibility
+    
+    Returns:
+        tuple: (model, per_round_accuracies) where model is the final trained model
+    """
+    # Partition training data in a non-IID manner
+    client_partitions = partition_data_non_iid(
+        train_features, train_labels, num_clients, shards_per_client, seed
+    )
+    
+    # Run FedAvg
+    model, per_round_accuracies = run_fedavg(
+        client_partitions, test_features, test_labels, model_config,
+        num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed
+    )
+    
+    return model, per_round_accuracies
 
 # Step 24 - compute_non_iid_gap (not yet solved)
 # TODO: implement
