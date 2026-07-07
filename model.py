@@ -277,8 +277,28 @@ def iterate_client_batches(client_features, client_labels, batch_size, seed):
     
     return batches
 
-# Step 8 - compute_batch_loss (not yet solved)
-# TODO: implement
+# Step 8 - compute_batch_loss
+def compute_batch_loss(model, batch_features, batch_labels):
+    """
+    Compute cross-entropy loss for one batch given the model.
+    
+    Args:
+        model: nn.Module that maps features to logits
+        batch_features: (B, input_size) tensor of features
+        batch_labels: (B,) tensor of integer class labels
+    
+    Returns:
+        torch.Tensor: Scalar loss tensor attached to computation graph
+    """
+    # Get logits from the model
+    logits = model(batch_features)
+    
+    # Compute cross-entropy loss
+    # The model returns raw logits, so we use CrossEntropyLoss which applies softmax internally
+    loss_fn = nn.CrossEntropyLoss()
+    loss = loss_fn(logits, batch_labels)
+    
+    return loss
 
 # Step 9 - local_sgd_step (not yet solved)
 # TODO: implement
