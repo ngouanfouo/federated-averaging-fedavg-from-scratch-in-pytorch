@@ -566,8 +566,60 @@ def select_round_clients(num_clients, client_fraction, seed):
     # Convert to Python list and sort
     return sorted(selected.tolist())
 
-# Step 18 - run_communication_round (not yet solved)
-# TODO: implement
+# Step 18 - run_communication_round
+def run_communication_round(global_state, client_partitions, selected_clients, model_config, local_epochs, batch_size, learning_rate, seed):
+    """
+    Run one FedAvg communication round on selected clients.
+    
+    Args:
+        global_state: Current global model state dict
+        client_partitions: List of (client_features, client_labels) for all clients
+        selected_clients: List of client indices to train this round
+        model_config: Dict with 'input_size', 'hidden_size', 'num_classes'
+        local_epochs: Number of local training epochs per client
+        batch_size: Mini-batch size for local training
+        learning_rate: Learning rate for local SGD
+        seed: Random seed for reproducibility
+    
+    Returns:
+        dict: New global state dict after aggregation
+    """
+    # Extract model configuration
+    input_size = model_config['input_size']
+    hidden_size = model_config['hidden_size']
+    num_classes = model_config['num_classes']
+    
+    # Lists to collect client states and sample counts
+    client_states = []
+    client_sample_counts = []
+    
+    # Train each selected client
+    for client_idx in selected_clients:
+        # Get client's data
+        client_features, client_labels = client_partitions[client_idx]
+        
+        # Build a fresh model
+        model = build_mlp_classifier(input_size, hidden_size, num_classes)
+        
+        # Load the global state into the model
+        load_model_state(model, global_state)
+        
+        # Train the client locally
+        # Use a different seed for each client to ensure diversity
+        client_seed = seed + client_idx
+        trained_state = train_client_local(
+            model, client_features, client_labels,
+            local_epochs, batch_size, learning_rate, client_seed
+        )
+        
+        # Store the trained state and sample count
+        client_states.append(trained_state)
+        client_sample_counts.append(client_features.shape[0])
+    
+    # Aggregate the client states using sample-weighted averaging
+    new_global_state = aggregate_weighted_average(client_states, client_sample_counts)
+    
+    return new_global_state
 
 # Step 19 - evaluate_accuracy (not yet solved)
 # TODO: implement
