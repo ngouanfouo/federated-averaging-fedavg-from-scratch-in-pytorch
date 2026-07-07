@@ -367,8 +367,27 @@ def train_client_local(model, client_features, client_labels, local_epochs, batc
     # Return the updated model state dict
     return model.state_dict()
 
-# Step 11 - clone_model_state (not yet solved)
-# TODO: implement
+# Step 11 - clone_model_state
+def clone_model_state(model):
+    """
+    Create a deep copy of a model's state dict with detached tensors.
+    
+    Args:
+        model: nn.Module to clone state from
+    
+    Returns:
+        OrderedDict: New state dict with detached, cloned tensors
+    """
+    # Get the model's state dict
+    state_dict = model.state_dict()
+    
+    # Create a new dict with detached clones of each tensor
+    cloned_state = {}
+    for key, tensor in state_dict.items():
+        # Clone and detach the tensor to break all connections
+        cloned_state[key] = tensor.detach().clone()
+    
+    return cloned_state
 
 # Step 12 - load_model_state (not yet solved)
 # TODO: implement
