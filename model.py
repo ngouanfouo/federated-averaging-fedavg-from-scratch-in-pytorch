@@ -905,6 +905,39 @@ def rounds_to_target_vs_local_epochs(client_partitions, test_features, test_labe
     
     return results
 
-# Step 26 - accuracy_vs_client_fraction (not yet solved)
-# TODO: implement
+# Step 26 - accuracy_vs_client_fraction
+def accuracy_vs_client_fraction(client_partitions, test_features, test_labels, model_config, client_fraction_list, num_rounds, local_epochs, batch_size, learning_rate, seed):
+    """
+    Sweep over client fractions and record final test accuracy for each.
+    
+    Args:
+        client_partitions: List of (client_features, client_labels) for all clients
+        test_features: (N, input_size) tensor of test features
+        test_labels: (N,) tensor of test labels
+        model_config: Dict with 'input_size', 'hidden_size', 'num_classes'
+        client_fraction_list: List of client fractions to test
+        num_rounds: Number of communication rounds
+        local_epochs: Number of local training epochs per client
+        batch_size: Mini-batch size for local training
+        learning_rate: Learning rate for local SGD
+        seed: Random seed for reproducibility (same for all runs)
+    
+    Returns:
+        dict: Mapping from client_fraction to final test accuracy
+    """
+    # Dictionary to store results
+    results = {}
+    
+    # Test each client fraction
+    for fraction in client_fraction_list:
+        # Run FedAvg with this client fraction (using the same seed)
+        _, accuracies = run_fedavg(
+            client_partitions, test_features, test_labels, model_config,
+            num_rounds, fraction, local_epochs, batch_size, learning_rate, seed
+        )
+        
+        # Record the final accuracy (last element of the accuracy list)
+        results[fraction] = accuracies[-1]
+    
+    return results
 
