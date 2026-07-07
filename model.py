@@ -94,8 +94,59 @@ def train_test_split_dataset(features, labels, test_fraction, seed):
     
     return train_features, train_labels, test_features, test_labels
 
-# Step 4 - partition_data_iid (not yet solved)
-# TODO: implement
+# Step 4 - partition_data_iid
+def partition_data_iid(train_features, train_labels, num_clients, seed):
+    """
+    Partition training data across clients in an IID manner.
+    
+    Args:
+        train_features: (M, input_size) tensor of training features
+        train_labels: (M,) tensor of training labels
+        num_clients: Number of clients to partition data among
+        seed: Random seed for reproducibility
+    
+    Returns:
+        list: List of (client_features, client_labels) tensor pairs for each client
+    """
+    M = train_features.shape[0]
+    
+    # If no clients specified, treat as 1 client (all data)
+    if num_clients <= 0:
+        num_clients = 1
+    
+    # Create a seeded generator
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    
+    # Shuffle the row indices
+    indices = torch.randperm(M, generator=generator)
+    
+    # Shuffle the data using the permuted indices
+    shuffled_features = train_features[indices]
+    shuffled_labels = train_labels[indices]
+    
+    # Calculate base samples per client and remainder
+    samples_per_client = M // num_clients
+    remainder = M % num_clients
+    
+    # Split data into contiguous groups for each client
+    parts = []
+    start_idx = 0
+    
+    for i in range(num_clients):
+        # Distribute the remainder one by one to the first few clients
+        extra = 1 if i < remainder else 0
+        end_idx = start_idx + samples_per_client + extra
+        
+        # Extract client data
+        client_features = shuffled_features[start_idx:end_idx]
+        client_labels = shuffled_labels[start_idx:end_idx]
+        
+        parts.append((client_features, client_labels))
+        
+        start_idx = end_idx
+    
+    return parts
 
 # Step 5 - partition_data_non_iid (not yet solved)
 # TODO: implement
