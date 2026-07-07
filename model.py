@@ -458,8 +458,27 @@ def initialize_global_state(input_size, hidden_size, num_classes, seed):
     
     return state_dict
 
-# Step 14 - add_state_dicts (not yet solved)
-# TODO: implement
+# Step 14 - add_state_dicts
+def add_state_dicts(state_a, state_b):
+    """
+    Add two state dictionaries elementwise.
+    
+    Args:
+        state_a: First state dict with parameter tensors
+        state_b: Second state dict with parameter tensors
+    
+    Returns:
+        dict: New state dict with elementwise sums of matching tensors
+    """
+    # Create a new dictionary for the result
+    result = {}
+    
+    # Iterate over keys in state_a (they should be the same as state_b)
+    for key in state_a.keys():
+        # Elementwise addition of the tensors
+        result[key] = state_a[key] + state_b[key]
+    
+    return result
 
 # Step 15 - scale_state_dict (not yet solved)
 # TODO: implement
