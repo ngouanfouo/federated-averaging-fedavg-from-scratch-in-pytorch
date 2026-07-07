@@ -713,8 +713,56 @@ def run_fedavg(client_partitions, test_features, test_labels, model_config, num_
     
     return final_model, per_round_accuracies
 
-# Step 21 - train_centralized_baseline (not yet solved)
-# TODO: implement
+# Step 21 - train_centralized_baseline
+def train_centralized_baseline(train_features, train_labels, test_features, test_labels, model_config, num_epochs, batch_size, learning_rate, seed):
+    """
+    Train the MLP on pooled training data using ordinary mini-batch SGD.
+    This serves as a non-federated baseline.
+    
+    Args:
+        train_features: (M, input_size) tensor of training features
+        train_labels: (M,) tensor of training labels
+        test_features: (N, input_size) tensor of test features
+        test_labels: (N,) tensor of test labels
+        model_config: Dict with 'input_size', 'hidden_size', 'num_classes'
+        num_epochs: Number of training epochs
+        batch_size: Mini-batch size
+        learning_rate: Learning rate for SGD optimizer
+        seed: Random seed for reproducibility
+    
+    Returns:
+        float: Test accuracy in [0, 1]
+    """
+    # Extract model configuration
+    input_size = model_config['input_size']
+    hidden_size = model_config['hidden_size']
+    num_classes = model_config['num_classes']
+    
+    # Build a fresh model
+    model = build_mlp_classifier(input_size, hidden_size, num_classes)
+    
+    # Create SGD optimizer
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    
+    # Train for num_epochs
+    for epoch in range(num_epochs):
+        # Use a different seed for each epoch to reshuffle
+        epoch_seed = seed + epoch
+        
+        # Get batches for this epoch
+        batches = iterate_client_batches(
+            train_features, train_labels, batch_size, epoch_seed
+        )
+        
+        # Process each batch
+        for batch_features, batch_labels in batches:
+            # Perform one SGD update
+            local_sgd_step(model, optimizer, batch_features, batch_labels)
+    
+    # Evaluate on test set
+    accuracy = evaluate_accuracy(model, test_features, test_labels)
+    
+    return accuracy
 
 # Step 22 - run_fedavg_iid (not yet solved)
 # TODO: implement
