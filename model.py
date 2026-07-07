@@ -407,8 +407,56 @@ def load_model_state(model, state_dict):
     # Return the model for chaining
     return model
 
-# Step 13 - initialize_global_state (not yet solved)
-# TODO: implement
+# Step 13 - initialize_global_state
+class MLPClassifier(nn.Module):
+    def __init__(self, input_size, hidden_size, num_classes):
+        super().__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, num_classes)
+        self.relu = nn.ReLU()
+    
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+def build_mlp_classifier(input_size, hidden_size, num_classes):
+    """
+    Build a simple MLP classifier with one hidden layer.
+    
+    Args:
+        input_size: Dimension of input features
+        hidden_size: Dimension of hidden layer
+        num_classes: Number of output classes
+    
+    Returns:
+        nn.Module: Neural network that maps (N, input_size) to (N, num_classes) logits
+    """
+    return MLPClassifier(input_size, hidden_size, num_classes)
+
+def initialize_global_state(input_size, hidden_size, num_classes, seed):
+    """
+    Initialize the global model with reproducible random weights.
+    
+    Args:
+        input_size: Dimension of input features
+        hidden_size: Dimension of hidden layer
+        num_classes: Number of output classes
+        seed: Random seed for reproducibility
+    
+    Returns:
+        OrderedDict: Cloned state dict of the initialized model
+    """
+    # Set the seed for reproducibility
+    torch.manual_seed(seed)
+    
+    # Build a fresh MLP model
+    model = build_mlp_classifier(input_size, hidden_size, num_classes)
+    
+    # Clone the model's state dict (detached, independent tensors)
+    state_dict = clone_model_state(model)
+    
+    return state_dict
 
 # Step 14 - add_state_dicts (not yet solved)
 # TODO: implement
