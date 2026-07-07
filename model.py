@@ -223,8 +223,18 @@ def partition_data_non_iid(train_features, train_labels, num_clients, shards_per
     
     return parts
 
-# Step 6 - count_client_samples (not yet solved)
-# TODO: implement
+# Step 6 - count_client_samples
+def count_client_samples(client_partitions):
+    """
+    Count the number of samples held by each client.
+    
+    Args:
+        client_partitions: List of (client_features, client_labels) tensor pairs
+    
+    Returns:
+        list: List of ints giving the number of samples for each client, in the same order
+    """
+    return [features.shape[0] for features, _ in client_partitions]
 
 # Step 7 - iterate_client_batches (not yet solved)
 # TODO: implement
