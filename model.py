@@ -56,8 +56,43 @@ def build_synthetic_dataset(num_samples, input_size, num_classes, seed):
     
     return features, labels
 
-# Step 3 - train_test_split_dataset (not yet solved)
-# TODO: implement
+# Step 3 - train_test_split_dataset
+def train_test_split_dataset(features, labels, test_fraction, seed):
+    """
+    Split dataset into train and test sets with reproducible randomness.
+    
+    Args:
+        features: (N, input_size) tensor of features
+        labels: (N,) tensor of labels
+        test_fraction: Fraction of data to use for test set
+        seed: Random seed for reproducibility
+    
+    Returns:
+        tuple: (train_features, train_labels, test_features, test_labels)
+    """
+    N = features.shape[0]
+    
+    # Create a seeded generator
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    
+    # Generate shuffled indices
+    indices = torch.randperm(N, generator=generator)
+    
+    # Calculate test size
+    test_size = int(N * test_fraction)
+    
+    # Split indices
+    test_indices = indices[:test_size]
+    train_indices = indices[test_size:]
+    
+    # Split the data
+    train_features = features[train_indices]
+    train_labels = labels[train_indices]
+    test_features = features[test_indices]
+    test_labels = labels[test_indices]
+    
+    return train_features, train_labels, test_features, test_labels
 
 # Step 4 - partition_data_iid (not yet solved)
 # TODO: implement
