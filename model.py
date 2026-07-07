@@ -861,8 +861,49 @@ def compute_non_iid_gap(iid_accuracies, non_iid_accuracies):
         'gap': gap
     }
 
-# Step 25 - rounds_to_target_vs_local_epochs (not yet solved)
-# TODO: implement
+# Step 25 - rounds_to_target_vs_local_epochs
+def rounds_to_target_vs_local_epochs(client_partitions, test_features, test_labels, model_config, local_epochs_list, target_accuracy, num_rounds, client_fraction, batch_size, learning_rate, seed):
+    """
+    Measure how local epochs affect the number of rounds needed to reach target accuracy.
+    
+    Args:
+        client_partitions: List of (client_features, client_labels) for all clients
+        test_features: (N, input_size) tensor of test features
+        test_labels: (N,) tensor of test labels
+        model_config: Dict with 'input_size', 'hidden_size', 'num_classes'
+        local_epochs_list: List of local epoch values to test
+        target_accuracy: Target accuracy to reach (in [0, 1])
+        num_rounds: Maximum number of communication rounds
+        client_fraction: Fraction of clients to select each round
+        batch_size: Mini-batch size for local training
+        learning_rate: Learning rate for local SGD
+        seed: Random seed for reproducibility
+    
+    Returns:
+        dict: Mapping from local_epochs to first round index reaching target, or None
+    """
+    # Dictionary to store results
+    results = {}
+    
+    # Test each local epochs value
+    for E in local_epochs_list:
+        # Run FedAvg with this local_epochs value
+        _, accuracies = run_fedavg(
+            client_partitions, test_features, test_labels, model_config,
+            num_rounds, client_fraction, E, batch_size, learning_rate, seed
+        )
+        
+        # Find the first round where accuracy reaches target
+        found_round = None
+        for round_idx, acc in enumerate(accuracies):
+            if acc >= target_accuracy:
+                found_round = round_idx
+                break
+        
+        # Store the result (round index or None)
+        results[E] = found_round
+    
+    return results
 
 # Step 26 - accuracy_vs_client_fraction (not yet solved)
 # TODO: implement
