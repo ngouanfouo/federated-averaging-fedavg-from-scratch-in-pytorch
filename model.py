@@ -389,8 +389,23 @@ def clone_model_state(model):
     
     return cloned_state
 
-# Step 12 - load_model_state (not yet solved)
-# TODO: implement
+# Step 12 - load_model_state
+def load_model_state(model, state_dict):
+    """
+    Load a state dict of parameters into a model in place.
+    
+    Args:
+        model: nn.Module to load parameters into
+        state_dict: Dict of parameter tensors to load
+    
+    Returns:
+        nn.Module: The same model object (for chaining)
+    """
+    # Load the state dict into the model
+    model.load_state_dict(state_dict)
+    
+    # Return the model for chaining
+    return model
 
 # Step 13 - initialize_global_state (not yet solved)
 # TODO: implement
