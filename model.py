@@ -621,8 +621,37 @@ def run_communication_round(global_state, client_partitions, selected_clients, m
     
     return new_global_state
 
-# Step 19 - evaluate_accuracy (not yet solved)
-# TODO: implement
+# Step 19 - evaluate_accuracy
+def evaluate_accuracy(model, test_features, test_labels):
+    """
+    Evaluate model accuracy on test data.
+    
+    Args:
+        model: nn.Module to evaluate
+        test_features: (N, input_size) tensor of test features
+        test_labels: (N,) tensor of integer class labels
+    
+    Returns:
+        float: Fraction of correctly classified examples in [0, 1]
+    """
+    # Set model to evaluation mode
+    model.eval()
+    
+    # Disable gradient computation
+    with torch.no_grad():
+        # Forward pass to get logits
+        logits = model(test_features)
+        
+        # Get predictions by taking argmax over class dimension
+        predictions = torch.argmax(logits, dim=1)
+        
+        # Count correct predictions
+        correct = (predictions == test_labels).sum().item()
+        
+        # Calculate accuracy
+        accuracy = correct / len(test_labels)
+        
+    return accuracy
 
 # Step 20 - run_fedavg (not yet solved)
 # TODO: implement
